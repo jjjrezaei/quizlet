@@ -8,26 +8,18 @@ from selenium.webdriver.support.wait import WebDriverWait #for WebDriverWait... 
 from selenium.common.exceptions import NoSuchElementException #try except
 import csv #damn idk if im supposed to import this much stuff but filewriter/reader basically
 
-driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
-driver.get('https://quizlet.com/750452137/pol-s-428-test-3-flash-cards/')
+driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install())) #set up the browser
+filename = "normaltitle" #create the file
+
+driver.get('https://quizlet.com/280584853/anth101-week-10-hw-flash-cards/')
 WebDriverWait(driver, timeout=100)
+fullInfo = driver.find_element(By.CLASS_NAME, 'SetPageTerms-termsList').text
 
-try:
-    t = driver.find_element(By.CLASS_NAME, 'SetPageTerms-termsList').text
+with open(filename, 'w') as csvfile:
+    csvwriter = csv.writer(csvfile, delimiter=' ', quotechar=' ', dialect='excel') #spaces in between chars
+    csvwriter.writerows([[fullInfo]]) #dont use writerow, that just writes first term
 
-    filename = "normaltitle"
-
-    with open(filename, 'w') as csvfile:
-        
-        csvwriter = csv.writer(csvfile, delimiter=' ', quotechar=' ', dialect='excel') #spaces in between chars
-        csvwriter.writerows([[t]]) #writerow just writes first term; brackets place the item in sequence but chars still considered individual fields hence why there's a comma between each letter
-        print("csv created :)")
-
-    with open('normaltitle', mode = 'r') as csvfile: #read out the csv file just created
-        csvFile = csv.reader(csvfile)
-        for lines in csvFile:
-            print(lines)
-
-except NoSuchElementException:
-    print("fail lmao")
-    pass
+with open('normaltitle', mode = 'r') as csvfile: #read out the csv file
+    csvFile = csv.reader(csvfile)
+    for lines in csvFile:
+        print(lines)

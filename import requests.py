@@ -6,20 +6,59 @@ from webdriver_manager.chrome import ChromeDriverManager #using webdriver manage
 from selenium.webdriver.common.by import By #importing By idk what it does lol
 from selenium.webdriver.support.wait import WebDriverWait #for WebDriverWait... in case u couldnt tell
 from selenium.common.exceptions import NoSuchElementException #try except
-import csv #damn idk if im supposed to import this much stuff but filewriter/reader basically
+import csv #filewriter/reader
 
-driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install())) #set up the browser
-filename = "normaltitle" #create the file
+class quizletCSV(object):
+    def __init__(self, fileName, link):
+        self.fileName = fileName
+        self.link = link
 
-driver.get('https://quizlet.com/280584853/anth101-week-10-hw-flash-cards/')
-WebDriverWait(driver, timeout=100)
-fullInfo = driver.find_element(By.CLASS_NAME, 'SetPageTerms-termsList').text
+    def createCSV(self, fileName): #creates a new BLANK csv file
+        with open(fileName, 'w') as csvfile:
+            csvwriter = csv.writer(csvfile, delimiter=' ', quotechar=' ', dialect='excel') #creates csvwriter object
+            csvwriter.writerow(' ')
+        print('createCSV executed...')
 
-with open(filename, 'w') as csvfile:
-    csvwriter = csv.writer(csvfile, delimiter=' ', quotechar=' ', dialect='excel') #spaces in between chars
-    csvwriter.writerows([[fullInfo]]) #dont use writerow, that just writes first term
+    def writeCSV(self, fileName, link):
+        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install())) #set up the browser
+        driver.get(link)
+        WebDriverWait(driver, timeout=100)
+        fullInfo = driver.find_element(By.CLASS_NAME, 'SetPageTerms-termsList').text
 
-with open('normaltitle', mode = 'r') as csvfile: #read out the csv file
-    csvFile = csv.reader(csvfile)
-    for lines in csvFile:
-        print(lines)
+        with open(fileName,'a') as csvfile:
+            csvwriter = csv.writer(csvfile, delimiter=' ', quotechar=' ', dialect='excel') #creates csvwriter object
+            csvwriter.writerows([[fullInfo]]) #dont use writerow, that just writes first term
+
+        with open(fileName, mode = 'r') as csvfile: #read out the csv file
+            csvFile = csv.reader(csvfile)
+            for lines in csvFile:
+                print(lines)
+        print('writeCSV executed...')
+    def diffLink(self, newLink, link):
+        self.link = newLink 
+
+
+newOrOldInput = input('do you want to append to a new document or an old document? type NEW or OLD')
+nameFile = input('what do you want to name your file?')
+linkName = input('paste the link you want to append to your file')
+
+if newOrOldInput == 'NEW':
+    newFile = quizletCSV(nameFile, linkName)
+    newFile.createCSV(nameFile)
+    newFile.writeCSV(nameFile, linkName)
+
+    while(input('do you want to add another link? type NO to quitpaste ') != 'NO'):
+        linkName = input('paste link here')
+        newFile.writeCSV(nameFile, linkName)
+        
+    #do you want to submit another link? while !no prompt for link then call class again...
+    #does tihs create a new class instance each time? how to avoid that?
+    #in general the logic here is off bc fileName in createCSV method is not used.. fix this
+elif newOrOldInput == 'OLD':
+    nameFile = input('what is the name of the file you want to open?')
+    linkName = input('paste the link you want to append to your file')
+    quizletCSV()
+else:
+    print('unrecognized input, type either NEW or OLD')
+
+print('pls - end')
